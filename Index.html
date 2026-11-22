@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>CALL CENTER RAGE '84 — 80s Arcade Desk Shift</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --neon-pink: #ff2a85;
+      --neon-cyan: #00f3ff;
+      --neon-yellow: #ffe600;
+      --neon-green: #39ff14;
+      --neon-red: #ff1e1e;
+      --crt-dark: #090612;
+      --cubicle-wall: #2b2440;
+      --desk-wood: #5e3824;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #05030a;
+      color: #f4f4f8;
+      font-family: 'VT323', monospace;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .font-pixel {
+      font-family: 'Press Start 2P', monospace;
+    }
+
+    .font-vt {
+      font-family: 'VT323', monospace;
+    }
+
+    /* CRT Monitor & Scanline Overlay */
+    .crt-frame {
+      position: relative;
+      width: 100%;
+      max-width: 1120px;
+      background: radial-gradient(circle at 50% 35%, #1d1536 0%, #0d081c 75%, #05030a 100%);
+      border: 6px solid #352b52;
+      border-radius: 18px;
+      box-shadow:
+        0 0 0 4px #161026,
+        0 0 40px rgba(0, 243, 255, 0.22),
+        inset 0 0 60px rgba(0, 0, 0, 0.85);
+      overflow: hidden;
+    }
+
+    .crt-scanlines::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%,
+        rgba(0, 0, 0, 0.34) 50%
+      ), linear-gradient(
+        90deg,
+        rgba(255, 0, 0, 0.04),
+        rgba(0, 255, 0, 0.02),
+        rgba(0, 0, 255, 0.04)
+      );
+      background-size: 100% 4px, 6px 100%;
+      pointer-events: none;
+      z-index: 50;
+    }
+
+    .crt-glow-text-cyan {
+      text-shadow: 0 0 6px rgba(0, 243, 255, 0.8), 0 0 14px rgba(0, 243, 255, 0.4);
+    }
+
+    .crt-glow-text-pink {
+      text-shadow: 0 0 6px rgba(255, 42, 133, 0.85), 0 0 14px rgba(255, 42, 133, 0.45);
+    }
+
+    .crt-glow-text-yellow {
+      text-shadow: 0 0 6px rgba(255, 230, 0, 0.85), 0 0 14px rgba(255, 230, 0, 0.4);
+    }
+
+    .crt-glow-text-red {
+      text-shadow: 0 0 8px rgba(255, 30, 30, 0.95), 0 0 18px rgba(255, 30, 30, 0.6);
+    }
+
+    /* Screen Shake Animation on Rage Bait */
+    @keyframes rageShake {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      10% { transform: translate(-12px, -8px) rotate(-1.5deg); }
+      20% { transform: translate(12px, 6px) rotate(1.5deg); }
+      30% { transform: translate(-10px, 8px) rotate(-1deg); }
+      40% { transform: translate(10px, -6px) rotate(1deg); }
+      50% { transform: translate(-8px, -4px) rotate(-0.8deg); }
+      60% { transform: translate(8px, 5px) rotate(0.8deg); }
+      70% { transform: translate(-5px, 3px) rotate(-0.4deg); }
+      80% { transform: translate(5px, -3px) rotate(0.4deg); }
+      90% { transform: translate(-2px, 2px) rotate(0deg); }
+    }
+
+    .shake-screen {
+      animation: rageShake 0.55s cubic-bezier(.36,.07,.19,.97) both;
+    }
+
+    @keyframes redFlash {
+      0% { background-color: rgba(255, 20, 20, 0.55); }
+      100% { background-color: rgba(255, 20, 20, 0); }
+    }
+
+    .rage-flash-overlay {
+      animation: redFlash 0.65s ease-out forwards;
+    }
+
+    /* Phone Ringing Shake & Glow */
+    @keyframes phoneRingJitter {
+      0%, 100% { transform: translateY(0) rotate(0deg) scale(1.03); }
+      15% { transform: translateY(-5px) rotate(-6deg) scale(1.06); }
+      30% { transform: translateY(-3px) rotate(6deg) scale(1.06); }
+      45% { transform: translateY(-6px) rotate(-5deg) scale(1.06); }
+      60% { transform: translateY(-2px) rotate(5deg) scale(1.06); }
+      75% { transform: translateY(-5px) rotate(-3deg) scale(1.05); }
+    }
+
+    .phone-ringing .phone-body-svg {
+      animation: phoneRingJitter 0.32s infinite ease-in-out;
+      filter: drop-shadow(0 0 14px var(--ring-color, #ffe600));
+    }
+
+    @keyframes bellPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.45; transform: scale(1.18); }
+    }
+
+    .ring-badge-pulse {
+      animation: bellPulse 0.45s infinite ease-in-out;
+    }
+
+    /* Blinking Server Rack LEDs */
+    @keyframes ledBlinkA {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0.2; }
+    }
+    @keyframes ledBlinkB {
+      0%, 29% { opacity: 0.25; }
+      30%, 79% { opacity: 1; }
+      80%, 100% { opacity: 0.25; }
+    }
+
+    .led-a { animation: ledBlinkA 0.9s infinite; }
+    .led-b { animation: ledBlinkB 1.3s infinite; }
+    .led-c { animation: ledBlinkA 0.55s infinite; }
+
+    /* Retro Arcade Button Styling */
+    .arcade-btn {
+      position: relative;
+      border-radius: 10px;
+      border-bottom: 5px solid rgba(0, 0, 0, 0.65);
+      transition: transform 0.08s ease, filter 0.12s ease, border-bottom-width 0.08s ease;
+      cursor: pointer;
+    }
+    .arcade-btn:hover:not(:disabled) {
+      filter: brightness(1.14);
+    }
+    .arcade-btn:active:not(:disabled) {
+      transform: translateY(3px);
+      border-bottom-width: 2px;
+    }
+    .arcade-btn:disabled {
+      opacity: 0.42;
+      cursor: not-allowed;
+    }
+
+    /* Floating Popup Score Animation */
+    @keyframes floatUpFade {
+      0% {
+        opacity: 1;
+        transform: translate(-50%, 0) scale(0.85);
+      }
+      20% {
+        opacity: 1;
+        transform: translate(-50%, -14px) scale(1.08);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -62px) scale(0.95);
+      }
+    }
+
+    .floating-popup {
+      position: absolute;
+      pointer-events: none;
+      z-index: 45;
+      animation: floatUpFade 1.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      white-space: nowrap;
+    }
+
+    /* Blinking Insert Coin text */
+    @keyframes blinkInsertCoin {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0.15; }
+    }
+    .blink-coin {
+      animation: blinkInsertCoin 1.05s infinite;
+    }
+
+    /* Pixelated Wood Grain & Cubicle Fabric Pattern */
+    .cubicle-fabric {
+      background-color: #27203b;
+      background-image:
+        radial-gradient(#372d52 1.5px, transparent 1.5px),
+        radial-gradient(#1d172e 1.5px, #27203b 1.5px);
+      background-size: 16px 16px;
+      background-position: 0 0, 8px 8px;
+    }
+
+    .desk-surface {
+      background: linear-gradient(180deg, #75472c 0%, #59331d 35%, #3d2111 100%);
+      border-top: 6px solid #965e3c;
+      box-shadow: inset 0 8px 18px rgba(0,0,0,0.45);
+    }
+
+    /* Waveform bars animation on laptop */
+    @keyframes waveBar {
+      0%, 100% { height: 22%; }
+      50% { height: 95%; }
+    }
+    .wave-bar {
+      animation: waveBar 0.45s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="p-2 sm:p-4">
+
+  <!-- Main Arcade Cabinet / CRT Viewport -->
+  <div id="gameContainer" class="crt-frame crt-scanlines select-none">
+
+    <!-- Red Flash Layer for Rage Bait Penalty -->
+    <div id="rageFlashLayer" class="pointer-events-none absolute inset-0 z-40 hidden"></div>
+
+    <!-- Floating Popups Container -->
+    <div id="popupLayer" class="pointer-events-none absolute inset-0 z-40 overflow-hidden"></div>
+
+    <!-- TOP ARCADE HUD BAR -->
+    <header class="relative z-30 bg-[#0c081a]/95 border-b-4 border-[#3a2e5c] px-3 py-2.5 sm:px-6 sm:py-3 flex flex-wrap items-center justify-between gap-2">
+      <!-- Score & High Score -->
+      <div class="flex items-center gap-4 sm:gap-7">
+        <div>
+          <div class="font-pixel text-[9px] sm:text-[10px] text-[#00f3ff] tracking-wider">SCORE</div>
+          <div id="hudScore" class="font-pixel text-base sm:text-2xl text-white crt-glow-text-cyan mt-0.5">00000</div>
+        </div>
+        <div>
+          <div class="font-pixel text-[9px] sm:text-[10px] text-[#ff2a85] tracking-wider">HI-SCORE</div>
+          <div id="hudHighScore" class="font-pixel text-sm sm:text-xl text-[#ffe600] crt-glow-text-yellow mt-0.5">01500</div>
+        </div>
+      </div>
+
+      <!-- Center Shift Clock -->
+      <div class="flex flex-col items-center bg-[#16102b] border-2 border-[#473873] rounded-lg px-3 py-1 sm:px-5 sm:py-1.5 shadow-inner">
+        <span class="font-pixel text-[8px] sm:text-[9px] text-gray-400 tracking-widest">SHIFT TIMER</span>
+        <span id="hudTimer" class="font-pixel text-lg sm:text-2xl text-[#39ff14] tracking-wider">01:00</span>
+      </div>
+
+      <!-- Combo Streak & Sound Toggle -->
+      <div class="flex items-center gap-3 sm:gap-5">
+        <div class="text-right">
+          <div class="font-pixel text-[9px] sm:text-[10px] text-[#39ff14] tracking-wider">STREAK</div>
+          <div id="hudCombo" class="font-pixel text-sm sm:text-xl text-white mt-0.5">x1.0</div>
+        </div>
+        <button id="soundToggleBtn" type="button" title="Toggle Retro Synth Audio"
+          class="arcade-btn bg-[#241b42] hover:bg-[#33275c] border-2 border-[#00f3ff] text-[#00f3ff] px-2.5 py-2 rounded-lg font-pixel text-[10px] sm:text-xs flex items-center gap-1.5">
+          <span id="soundIcon">🔊</span>
+          <span class="hidden sm:inline" id="soundLabel">SFX ON</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- CALL CENTER CUBICLE SCENE -->
+    <main class="relative flex flex-col justify-between min-h-[540px] sm:min-h-[600px]">
+
+      <!-- UPPER CUBICLE WALL & BACKGROUND PROPS -->
+      <div class="cubicle-fabric relative px-3 pt-3 pb-4 sm:px-6 sm:pt-4 border-b-4 border-[#171226] grid grid-cols-12 gap-2 sm:gap-4 items-start">
+
+        <!-- Left Cubicle Wall: Posters & Sticky Notes -->
+        <div class="col-span-4 sm:col-span-3 flex flex-col gap-2">
+          <!-- Motivational 80s Poster -->
+          <div class="bg-[#141024] border-2 border-[#ff2a85] rounded-lg p-2 shadow-md transform -rotate-1">
+            <div class="font-pixel text-[8px] sm:text-[9px] text-[#ffe600] text-center leading-tight">
+              ★ BENGALURU '84 ★<br/>
+              <span class="text-[#ff2a85]">QUOTA OR BUST!</span>
+            </div>
+            <div class="mt-1.5 border-t border-[#362959] pt-1 text-[13px] sm:text-sm text-cyan-200 leading-none text-center">
+              SCREEN CALLER ID!<br/>
+              <span class="text-[#ff4d4d] font-bold">TROLLS = ZERO SCORE!</span>
+            </div>
+          </div>
+
+          <!-- Sticky Notes Row -->
+          <div class="hidden sm:flex gap-2 mt-1">
+            <div class="bg-[#fff066] text-[#1f1a05] p-1.5 rounded shadow transform rotate-2 w-1/2 text-xs leading-tight font-bold">
+              "DO NOT FEED THE TROLLS!" - Boss
+            </div>
+            <div class="bg-[#7afcff] text-[#072226] p-1.5 rounded shadow transform -rotate-3 w-1/2 text-xs leading-tight font-bold">
+              Keys 1-4: Answer<br/>Q-R: Drop Call
+            </div>
+          </div>
+        </div>
+
+        <!-- Center Laptop / CRT Terminal Monitor (Caller ID & Live Screening Hub) -->
+        <div class="col-span-8 sm:col-span-6 flex flex-col items-center">
+          <div class="w-full max-w-[490px] bg-[#b8b4c8] p-2 sm:p-3 rounded-t-xl border-4 border-[#7d7891] shadow-2xl">
+            <!-- Laptop Bezel Header -->
+            <div class="flex items-center justify-between px-1 pb-1.5 text-[#2d293b] font-pixel text-[8px] sm:text-[9px]">
+              <span>COMPU-CALL 8400 // LINE MONITOR</span>
+              <span class="flex items-center gap-1">
+                <span class="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                ONLINE
+              </span>
+            </div>
+
+            <!-- Inner Green/Amber Phosphor CRT Screen -->
+            <div id="laptopScreen" class="bg-[#071912] border-4 border-[#3a364a] rounded-lg p-2.5 sm:p-3.5 min-h-[168px] sm:min-h-[188px] flex flex-col justify-between relative overflow-hidden shadow-inner">
+              <!-- Top Status Strip inside Laptop -->
+              <div class="flex items-center justify-between border-b border-[#164a35] pb-1 text-xs sm:text-sm text-[#39ff14]">
+                <span id="terminalModeLabel" class="font-pixel text-[8px] sm:text-[9px] tracking-wider text-[#00f3ff]">INCOMING LINE SCANNER</span>
+                <span id="activeCallsCount" class="font-mono text-xs text-[#ffe600]">ACTIVE LINES: 0/4</span>
+              </div>
+
+              <!-- Dynamic Caller ID Queue / Live Transcript Area -->
+              <div id="laptopContent" class="my-auto py-1.5 flex flex-col gap-1.5">
+                <div class="text-center text-[#39ff14]/80 text-base sm:text-lg">
+                  AWAITING INCOMING CALLS ON LINES 1–4...
+                </div>
+              </div>
+
+              <!-- Bottom Feedback / Last Call Transcript Banner -->
+              <div id="laptopFooterFeed" class="border-t border-[#164a35] pt-1.5 flex items-center justify-between gap-2 text-xs sm:text-sm">
+                <span id="lastCallTranscript" class="text-[#9efcd7] truncate">
+                  TIP: Check Caller ID tag & clue before picking up!
+                </span>
+                <!-- Mini Audio Waveform -->
+                <div id="laptopWaveform" class="flex items-end gap-0.5 h-3.5 shrink-0 opacity-40">
+                  <span class="w-1 bg-[#39ff14] h-1"></span>
+                  <span class="w-1 bg-[#39ff14] h-2"></span>
+                  <span class="w-1 bg-[#39ff14] h-3"></span>
+                  <span class="w-1 bg-[#39ff14] h-1.5"></span>
+                  <span class="w-1 bg-[#39ff14] h-2.5"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Laptop Keyboard Base Hinge -->
+          <div class="w-[104%] max-w-[515px] h-3.5 bg-gradient-to-b from-[#9c97ad] to-[#6a657a] rounded-b-lg border-x-4 border-b-4 border-[#4d4859] shadow-lg"></div>
+        </div>
+
+        <!-- Right Cubicle Wall: Server Rack LEDs & Chai/Coffee Mug -->
+        <div class="hidden sm:flex sm:col-span-3 flex-col items-end justify-between gap-2">
+          <!-- Blinking PBX Server Rack -->
+          <div class="w-full bg-[#151224] border-2 border-[#473c6b] rounded-lg p-2 shadow-md">
+            <div class="font-pixel text-[8px] text-[#00f3ff] mb-1.5 flex justify-between">
+              <span>PBX-84 SWITCH</span>
+              <span class="text-[#39ff14]">OK</span>
+            </div>
+            <div class="grid grid-cols-6 gap-1.5 bg-[#0b0914] p-1.5 rounded border border-[#2a2342]">
+              <span class="h-2 rounded-sm bg-[#39ff14] led-a"></span>
+              <span class="h-2 rounded-sm bg-[#00f3ff] led-b"></span>
+              <span class="h-2 rounded-sm bg-[#ffe600] led-c"></span>
+              <span class="h-2 rounded-sm bg-[#ff2a85] led-a"></span>
+              <span class="h-2 rounded-sm bg-[#39ff14] led-b"></span>
+              <span class="h-2 rounded-sm bg-[#ff1e1e] led-c"></span>
+              <span class="h-2 rounded-sm bg-[#00f3ff] led-c"></span>
+              <span class="h-2 rounded-sm bg-[#39ff14] led-a"></span>
+              <span class="h-2 rounded-sm bg-[#ff2a85] led-b"></span>
+              <span class="h-2 rounded-sm bg-[#ffe600] led-a"></span>
+              <span class="h-2 rounded-sm bg-[#39ff14] led-c"></span>
+              <span class="h-2 rounded-sm bg-[#00f3ff] led-b"></span>
+            </div>
+          </div>
+
+          <!-- Top Agent Badge & Steaming Masala Chai Mug -->
+          <div class="flex items-center gap-3 mt-1">
+            <div class="bg-[#231942] border border-[#ffe600] rounded-lg px-2 py-1 text-center">
+              <div class="font-pixel text-[7px] text-[#ffe600]">AGENT RANK</div>
+              <div id="agentRankBadge" class="font-pixel text-[9px] text-white mt-0.5">ROOKIE</div>
+            </div>
+            <!-- SVG Coffee/Chai Mug -->
+            <div class="relative w-12 h-12 flex items-center justify-center" title="Hot Masala Chai">
+              <svg viewBox="0 0 64 64" class="w-11 h-11 drop-shadow-md">
+                <!-- Steam -->
+                <path d="M22 14 Q19 9 22 4" stroke="#ffffff" stroke-width="2.5" fill="none" opacity="0.6" stroke-linecap="round"/>
+                <path d="M32 12 Q35 7 32 2" stroke="#ffffff" stroke-width="2.5" fill="none" opacity="0.75" stroke-linecap="round"/>
+                <!-- Handle -->
+                <path d="M44 24 H52 A6 6 0 0 1 52 42 H44" stroke="#ff2a85" stroke-width="5" fill="none" stroke-linecap="round"/>
+                <!-- Mug Body -->
+                <rect x="14" y="18" width="32" height="32" rx="4" fill="#f4f1ea" stroke="#221a36" stroke-width="3"/>
+                <rect x="14" y="27" width="32" height="10" fill="#ff2a85"/>
+                <text x="30" y="34" font-family="monospace" font-size="7" font-weight="bold" fill="#fff" text-anchor="middle">#1</text>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LOWER DESK SURFACE WITH 4 COLORFUL RETRO LANDLINE PHONES -->
+      <div class="desk-surface relative flex-1 px-3 py-4 sm:px-6 sm:py-5 flex flex-col justify-between">
+
+        <!-- Subtle Desk Mat & Instructions Strip -->
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3 bg-[#24130a]/75 border border-[#8c5636] rounded-lg px-3 py-1.5 text-xs sm:text-sm">
+          <div class="flex items-center gap-2 text-[#ffe600]">
+            <span class="font-pixel text-[9px] sm:text-[10px]">DESK CONSOLE:</span>
+            <span class="text-amber-100">Answer <strong class="text-[#39ff14]">CUSTOMERS</strong> (+PTS) • Drop <strong class="text-[#ff4d4d]">RAGE BAITERS</strong> (+25 PTS)</span>
+          </div>
+          <div class="text-amber-200/90 text-xs sm:text-sm">
+            Keys: <span class="bg-[#3d2314] px-1.5 py-0.5 rounded border border-amber-500/40 text-white">1-4</span> Answer |
+            <span class="bg-[#3d2314] px-1.5 py-0.5 rounded border border-amber-500/40 text-white">Q-R</span> Drop
+          </div>
+        </div>
+
+        <!-- 4 DESK PHONES GRID -->
+        <div id="phonesGrid" class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 my-auto">
+          <!-- Phone Slots 0, 1, 2, 3 injected by JS for clean state sync -->
+        </div>
+
+      </div>
+    </main>
+
+    <!-- START SCREEN OVERLAY -->
+    <div id="startOverlay" class="absolute inset-0 z-30 bg-[#080514]/92 backdrop-blur-sm flex flex-col items-center justify-center p-4 sm:p-8 text-center">
+      <div class="max-w-2xl w-full bg-[#140e29] border-4 border-[#00f3ff] rounded-2xl p-5 sm:p-8 shadow-[0_0_50px_rgba(0,243,255,0.3)]">
+        <div class="font-pixel text-[10px] sm:text-xs text-[#ff2a85] tracking-widest mb-2">
+          ★ CYBER-TELECOM ARCADE DIVISION PRESENTS ★
+        </div>
+        <h1 class="font-pixel text-2xl sm:text-4xl md:text-5xl text-[#ffe600] crt-glow-text-yellow leading-snug mb-3">
+          CALL CENTER<br/>RAGE '84
+        </h1>
+        <p class="text-lg sm:text-2xl text-cyan-200 max-w-xl mx-auto mb-5 leading-snug">
+          Survive a frantic 60-second shift! Screen incoming Caller IDs on your terminal before picking up the ringing desk phones.
+        </p>
+
+        <!-- Rules Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left mb-6">
+          <div class="bg-[#0d1f18] border-2 border-[#39ff14] rounded-xl p-3">
+            <div class="font-pixel text-[10px] text-[#39ff14] mb-1">✔ VALID CUSTOMERS</div>
+            <p class="text-base sm:text-lg text-green-100 leading-tight">
+              Legit tech support & billing callers (e.g., <span class="text-[#ffe600]">Grandma_42, Priya_K, Mr_Sharma</span>). Answer fast for <span class="text-[#39ff14] font-bold">+100 to +250 PTS</span> & combo multipliers!
+            </p>
+          </div>
+          <div class="bg-[#260c14] border-2 border-[#ff1e1e] rounded-xl p-3">
+            <div class="font-pixel text-[10px] text-[#ff4d4d] mb-1">☠ RAGE BAITERS</div>
+            <p class="text-base sm:text-lg text-red-100 leading-tight">
+              Pranksters & angry trolls (e.g., <span class="text-[#ffe600]">TrollKing99, Screamer_X, Fake_IRS</span>). Answering resets your <span class="text-[#ff4d4d] font-bold underline">SCORE TO ZERO!</span> Hit <strong>DROP</strong> instead!
+            </p>
+          </div>
+        </div>
+
+        <button id="startGameBtn" type="button"
+          class="arcade-btn bg-gradient-to-r from-[#ff2a85] via-[#ff5e00] to-[#ffe600] text-[#0b0614] font-pixel text-sm sm:text-lg px-7 py-4 rounded-xl border-2 border-white shadow-[0_0_25px_rgba(255,42,133,0.65)]">
+          <span class="blink-coin">► INSERT COIN / START SHIFT ◄</span>
+        </button>
+
+        <div class="mt-4 text-sm sm:text-base text-gray-400">
+          Desktop Shortcuts: <span class="text-[#00f3ff]">[1] [2] [3] [4]</span> to Answer • <span class="text-[#ff2a85]">[Q] [W] [E] [R]</span> to Drop Call
+        </div>
+      </div>
+    </div>
+
+    <!-- GAME OVER SUMMARY OVERLAY -->
+    <div id="gameOverOverlay" class="hidden absolute inset-0 z-30 bg-[#080514]/94 backdrop-blur-sm flex flex-col items-center justify-center p-4 sm:p-8 text-center">
+      <div class="max-w-xl w-full bg-[#140e29] border-4 border-[#ff2a85] rounded-2xl p-5 sm:p-8 shadow-[0_0_50px_rgba(255,42,133,0.35)]">
+        <div id="gameOverTag" class="font-pixel text-xs text-[#00f3ff] tracking-widest mb-2">
+          SHIFT COMPLETE — TIME EXPIRED!
+        </div>
+        <h2 class="font-pixel text-2xl sm:text-4xl text-[#ffe600] crt-glow-text-yellow mb-5">
+          SHIFT REPORT
+        </h2>
+
+        <!-- Stats Breakdown -->
+        <div class="bg-[#0b0818] border-2 border-[#3b2e63] rounded-xl p-4 mb-6 space-y-2.5 text-lg sm:text-xl">
+          <div class="flex justify-between items-center border-b border-[#251d40] pb-2">
+            <span class="text-gray-300">FINAL SCORE:</span>
+            <span id="finalScoreStat" class="font-pixel text-lg sm:text-2xl text-[#39ff14]">0</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-cyan-200">CUSTOMERS HELPED:</span>
+            <span id="statCustomersHelped" class="font-pixel text-sm sm:text-base text-[#00f3ff]">0</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-amber-200">RAGE BAITERS DODGED:</span>
+            <span id="statTrollsDodged" class="font-pixel text-sm sm:text-base text-[#ffe600]">0</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-red-300">RAGE BAIT FALLEN FOR:</span>
+            <span id="statTrollsAnswered" class="font-pixel text-sm sm:text-base text-[#ff4d4d]">0</span>
+          </div>
+          <div class="flex justify-between items-center pt-1 border-t border-[#251d40]">
+            <span class="text-purple-200">BEST COMBO STREAK:</span>
+            <span id="statMaxStreak" class="font-pixel text-sm sm:text-base text-[#ff2a85]">x1.0</span>
+          </div>
+        </div>
+
+        <div id="newHighScoreBanner" class="hidden font-pixel text-xs sm:text-sm text-[#39ff14] crt-glow-text-cyan mb-4 animate-bounce">
+          ★ NEW ARCADE HIGH SCORE! ★
+        </div>
+
+        <button id="restartGameBtn" type="button"
+          class="arcade-btn bg-gradient-to-r from-[#00f3ff] to-[#39ff14] text-[#090612] font-pixel text-sm sm:text-base px-7 py-4 rounded-xl border-2 border-white shadow-[0_0_25px_rgba(0,243,255,0.55)]">
+          ► PLAY ANOTHER SHIFT ◄
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    /**
+     * ============================================================================
+     * CALL CENTER RAGE '84 — RETRO ARCADE WEB GAME
+     * Pure Vanilla JS + Web Audio API Synthesizer + Responsive CRT UI
+     * ============================================================================
+     */
+
+    // --------------------------------------------------------------------------
+    // 1. WEB AUDIO API RETRO SYNTHESIZER (Zero external audio dependencies)
+    // --------------------------------------------------------------------------
+    class RetroAudioEngine {
+      constructor() {
+        this.ctx = null;
+        this.muted = false;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) {
+            this.ctx = new AudioCtx();
+          }
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume().catch(() => {});
+        }
+      }
+
+      toggleMute() {
+        this.muted = !this.muted;
+        return this.muted;
+      }
+
+      // Classic 80s dual-tone landline telephone ring chirp
+      playPhoneRing(pitchOffset = 0) {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc1 = this.ctx.createOscillator();
+        const osc2 = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc1.type = 'square';
+        osc2.type = 'triangle';
+
+        const baseFreq1 = 440 + pitchOffset;
+        const baseFreq2 = 480 + pitchOffset;
+
+        // Warble frequency modulation for classic mechanical bell feel
+        osc1.frequency.setValueAtTime(baseFreq1, now);
+        osc2.frequency.setValueAtTime(baseFreq2, now);
+        for (let i = 0; i < 6; i++) {
+          const t = now + i * 0.045;
+          osc1.frequency.setValueAtTime(i % 2 === 0 ? baseFreq1 : baseFreq1 + 65, t);
+          osc2.frequency.setValueAtTime(i % 2 === 0 ? baseFreq2 : baseFreq2 + 65, t);
+        }
+
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.exponentialRampToValueAtTime(0.065, now + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+
+        osc1.connect(gain);
+        osc2.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + 0.29);
+        osc2.stop(now + 0.29);
+      }
+
+      // Positive chiptune arpeggio when helping a valid customer
+      playCustomerWin(combo = 1) {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const boost = Math.min(combo * 25, 220);
+        const notes = [523.25 + boost, 659.25 + boost, 783.99 + boost, 1046.5 + boost];
+
+        notes.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.055);
+
+          gain.gain.setValueAtTime(0.001, now + idx * 0.055);
+          gain.gain.exponentialRampToValueAtTime(0.08, now + idx * 0.055 + 0.015);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.055 + 0.13);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + idx * 0.055);
+          osc.stop(now + idx * 0.055 + 0.14);
+        });
+      }
+
+      // Subtle crisp blip when screening/dropping a Rage Baiter
+      playDropSuccess() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(620, now);
+        osc.frequency.exponentialRampToValueAtTime(310, now + 0.12);
+
+        gain.gain.setValueAtTime(0.09, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.13);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.14);
+      }
+
+      // Dramatic harsh buzzer & descending alarm when Rage Baited (Score Reset!)
+      playRageBaitBuzzer() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc1 = this.ctx.createOscillator();
+        const osc2 = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc1.type = 'sawtooth';
+        osc2.type = 'square';
+
+        osc1.frequency.setValueAtTime(165, now);
+        osc1.frequency.linearRampToValueAtTime(62, now + 0.55);
+
+        osc2.frequency.setValueAtTime(158, now);
+        osc2.frequency.linearRampToValueAtTime(55, now + 0.55);
+
+        gain.gain.setValueAtTime(0.16, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.58);
+
+        osc1.connect(gain);
+        osc2.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + 0.6);
+        osc2.stop(now + 0.6);
+      }
+
+      // Ticking clock sound for final 10 seconds
+      playClockTick(urgent = false) {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(urgent ? 980 : 720, now);
+
+        gain.gain.setValueAtTime(urgent ? 0.07 : 0.035, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      }
+
+      // Game Over fanfare
+      playGameOver() {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const melody = [440, 392, 349.23, 329.63, 261.63];
+        melody.forEach((freq, i) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(freq, now + i * 0.13);
+
+          gain.gain.setValueAtTime(0.08, now + i * 0.13);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.13 + 0.22);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + i * 0.13);
+          osc.stop(now + i * 0.13 + 0.24);
+        });
+      }
+    }
+
+    const audio = new RetroAudioEngine();
+
+    // --------------------------------------------------------------------------
+    // 2. CALLER DATABASE (Valid Customers vs. Rage Baiters with Distinct Clues)
+    // --------------------------------------------------------------------------
+    const VALID_CUSTOMERS = [
+      {
+        callerId: "GRANDMA_42",
+        tag: "VERIFIED • TECH HELP",
+        clue: "Says: 'My VCR is blinking 12:00 again...'",
+        transcript: "Grandma_42: 'Bless you beta! Fixed my tape!'",
+        points: 150
+      },
+      {
+        callerId: "PRIYA_K_99",
+        tag: "VERIFIED • BILLING",
+        clue: "Says: 'Checking my fiber modem invoice'",
+        transcript: "Priya_K_99: 'Thank you so much for the quick help!'",
+        points: 125
+      },
+      {
+        callerId: "MR_SHARMA",
+        tag: "VIP CLIENT • OFFICE",
+        clue: "Says: 'Need printer driver reset urgently'",
+        transcript: "Mr_Sharma: 'Splendid service! Promotion worthy!'",
+        points: 250
+      },
+      {
+        callerId: "CONFUSED_BOB",
+        tag: "VERIFIED • SUPPORT",
+        clue: "Says: 'Where is the ANY key on keyboard?'",
+        transcript: "Confused_Bob: 'Oh! Found the spacebar! Thanks!'",
+        points: 120
+      },
+      {
+        callerId: "AUNTY_MEERA",
+        tag: "VERIFIED • ACCOUNT",
+        clue: "Says: 'Forgot my email password, please help'",
+        transcript: "Aunty_Meera: 'You are a lifesaver, thank you!'",
+        points: 140
+      },
+      {
+        callerId: "DR_PATEL_MD",
+        tag: "PRIORITY • CLINIC",
+        clue: "Says: 'Clinic fax line needs dial-tone check'",
+        transcript: "Dr_Patel_MD: 'Fax is working now. Much obliged!'",
+        points: 200
+      },
+      {
+        callerId: "STUDENT_RAJ",
+        tag: "VERIFIED • INTERNET",
+        clue: "Says: 'Dial-up disconnected during homework'",
+        transcript: "Student_Raj: 'Back online! Submitting my essay!'",
+        points: 110
+      },
+      {
+        callerId: "BAKER_SUSAN",
+        tag: "VIP CLIENT • SHOP",
+        clue: "Says: 'Card machine offline at bakery'",
+        transcript: "Baker_Susan: 'Payments working! Saving you a cake!'",
+        points: 220
+      }
+    ];
+
+    const RAGE_BAITERS = [
+      {
+        callerId: "TROLL_KING99",
+        tag: "⚠ SPOOFED • PRANK",
+        clue: "Says: 'IS YOUR REFRIGERATOR RUNNING?! HAHA'",
+        transcript: "TROLL_KING99: 'HAHAHA GOTCHA!! AIRHORN NOISE!!'"
+      },
+      {
+        callerId: "RAGEBAITER_X",
+        tag: "⚠ BLOCKED • HOSTILE",
+        clue: "Says: 'LET ME SPEAK TO THE CEO OF INTERNET!'",
+        transcript: "RAGEBAITER_X: '*SCREAMS INTO MIC FOR 40 SECONDS*'"
+      },
+      {
+        callerId: "NO_CALLER_ID",
+        tag: "⚠ UNKNOWN • SPAM",
+        clue: "Audio: *Loud kazoo solo & dial-up screech*",
+        transcript: "NO_CALLER_ID: 'YOU JUST GOT PRANKED ON RADIO!'"
+      },
+      {
+        callerId: "ANGRY_KAREN0",
+        tag: "⚠ FLAGGED • TROLL",
+        clue: "Says: 'I DEMAND A REFUND FOR FREE AIR!'",
+        transcript: "ANGRY_KAREN0: 'I AM WRITING 900 BAD REVIEWS!!'"
+      },
+      {
+        callerId: "MEMELORD_84",
+        tag: "⚠ SPOOFED • BOT",
+        clue: "Says: 'All your base are belong to us lol'",
+        transcript: "MEMELORD_84: 'U MAD BRO?? SCORE WIPED!!'"
+      },
+      {
+        callerId: "FAKE_TAX_BOT",
+        tag: "⚠ SCAM • SPOOF",
+        clue: "Says: 'Pay 5000 gift cards in 2 seconds!'",
+        transcript: "FAKE_TAX_BOT: 'BEEP BOOP TIME WASTED! ZEROED!'"
+      },
+      {
+        callerId: "SCREAMER_666",
+        tag: "⚠ DANGER • NOISE",
+        clue: "Audio: *Heavy breathing & microwave beeps*",
+        transcript: "SCREAMER_666: 'AAAAAAAAAAAAHHHHHHHHHHHH!!'"
+      },
+      {
+        callerId: "TIME_WASTER",
+        tag: "⚠ FLAGGED • LOOP",
+        clue: "Says: 'Hold on let me put you on hold...'",
+        transcript: "TIME_WASTER: '*PLAYS BAD ELEVATOR MUSIC*'"
+      }
+    ];
+
+    // 4 Colorful Desk Phones Configuration
+    const PHONE_CONFIGS = [
+      {
+        id: 0,
+        lineLabel: "LINE 1",
+        name: "CRIMSON HOTLINE",
+        answerKey: "1",
+        dropKey: "Q",
+        bodyColor: "#ff2a55",
+        darkColor: "#9e1130",
+        accentColor: "#ff8da3",
+        ringHex: "#ff2a55",
+        pitchOffset: -40
+      },
+      {
+        id: 1,
+        lineLabel: "LINE 2",
+        name: "SUNBURST DESK",
+        answerKey: "2",
+        dropKey: "W",
+        bodyColor: "#ffe600",
+        darkColor: "#a89200",
+        accentColor: "#fff699",
+        ringHex: "#ffe600",
+        pitchOffset: 0
+      },
+      {
+        id: 2,
+        lineLabel: "LINE 3",
+        name: "CYBER CYAN",
+        answerKey: "3",
+        dropKey: "E",
+        bodyColor: "#00f3ff",
+        darkColor: "#008794",
+        accentColor: "#99fbff",
+        ringHex: "#00f3ff",
+        pitchOffset: 45
+      },
+      {
+        id: 3,
+        lineLabel: "LINE 4",
+        name: "ACID LIME",
+        answerKey: "4",
+        dropKey: "R",
+        bodyColor: "#39ff14",
+        darkColor: "#1d8f08",
+        accentColor: "#a6ff96",
+        ringHex: "#39ff14",
+        pitchOffset: 90
+      }
+    ];
+
+    // --------------------------------------------------------------------------
+    // 3. GAME STATE & DOM REFERENCES
+    // --------------------------------------------------------------------------
+    const SHIFT_DURATION = 60;
+    const HIGH_SCORE_STORAGE_KEY = "callCenterRage84_highScore";
+
+    const state = {
+      isPlaying: false,
+      timeLeft: SHIFT_DURATION,
+      score: 0,
+      highScore: parseInt(localStorage.getItem(HIGH_SCORE_STORAGE_KEY) || "1500", 10),
+      streakCount: 0,
+      comboMultiplier: 1.0,
+      maxStreakMultiplier: 1.0,
+      customersHelped: 0,
+      trollsDodged: 0,
+      trollsAnswered: 0,
+      phones: [null, null, null, null], // Holds active call object or null
+      timerInterval: null,
+      spawnTimeout: null,
+      ringSoundInterval: null
+    };
+
+    // DOM Elements
+    const gameContainer = document.getElementById("gameContainer");
+    const rageFlashLayer = document.getElementById("rageFlashLayer");
+    const popupLayer = document.getElementById("popupLayer");
+    const hudScore = document.getElementById("hudScore");
+    const hudHighScore = document.getElementById("hudHighScore");
+    const hudTimer = document.getElementById("hudTimer");
+    const hudCombo = document.getElementById("hudCombo");
+    const agentRankBadge = document.getElementById("agentRankBadge");
+    const phonesGrid = document.getElementById("phonesGrid");
+    const laptopContent = document.getElementById("laptopContent");
+    const activeCallsCount = document.getElementById("activeCallsCount");
+    const lastCallTranscript = document.getElementById("lastCallTranscript");
+    const laptopWaveform = document.getElementById("laptopWaveform");
+    const startOverlay = document.getElementById("startOverlay");
+    const gameOverOverlay = document.getElementById("gameOverOverlay");
+    const startGameBtn = document.getElementById("startGameBtn");
+    const restartGameBtn = document.getElementById("restartGameBtn");
+    const soundToggleBtn = document.getElementById("soundToggleBtn");
+    const soundIcon = document.getElementById("soundIcon");
+    const soundLabel = document.getElementById("soundLabel");
+
+    // --------------------------------------------------------------------------
+    // 4. RENDERING DESK PHONES & LAPTOP SCREEN
+    // --------------------------------------------------------------------------
+    function createPhoneSVG(cfg) {
+      return `
+        <svg viewBox="0 0 120 76" class="phone-body-svg w-24 h-16 sm:w-28 sm:h-18 mx-auto drop-shadow-[0_6px_6px_rgba(0,0,0,0.65)]">
+          <!-- Coiled Cord on Left -->
+          <path d="M16 32 Q6 36 14 42 Q6 48 14 54 Q6 60 18 64" stroke="#181426" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <!-- Phone Base Trapezoid -->
+          <polygon points="22,28 98,28 110,68 10,68" fill="${cfg.bodyColor}" stroke="#140f24" stroke-width="3.5" stroke-linejoin="round"/>
+          <!-- Base Shadow Lip -->
+          <rect x="10" y="61" width="100" height="7" rx="2" fill="${cfg.darkColor}"/>
+          <!-- Keypad / Rotary Dial Plate -->
+          <rect x="42" y="36" width="36" height="22" rx="3" fill="#171326" stroke="${cfg.accentColor}" stroke-width="1.5"/>
+          <!-- Keypad Dots -->
+          <circle cx="50" cy="42" r="2" fill="#ffffff"/>
+          <circle cx="60" cy="42" r="2" fill="#ffffff"/>
+          <circle cx="70" cy="42" r="2" fill="#ffffff"/>
+          <circle cx="50" cy="48" r="2" fill="#ffffff"/>
+          <circle cx="60" cy="48" r="2" fill="#ffffff"/>
+          <circle cx="70" cy="48" r="2" fill="#ffffff"/>
+          <circle cx="60" cy="54" r="2" fill="#ffe600"/>
+          <!-- Retro Handset Receiver -->
+          <path d="M16 20 C16 10, 104 10, 104 20 L108 28 C108 32, 92 32, 90 27 L88 22 L32 22 L30 27 C28 32, 12 32, 12 28 Z"
+                fill="${cfg.bodyColor}" stroke="#140f24" stroke-width="3.5" stroke-linejoin="round"/>
+          <!-- Handset Highlight -->
+          <path d="M26 15 Q60 11 94 15" stroke="${cfg.accentColor}" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        </svg>
+      `;
+    }
+
+    function buildPhonesDOM() {
+      phonesGrid.innerHTML = PHONE_CONFIGS.map((cfg) => `
+        <div id="phoneCard-${cfg.id}"
+             style="--ring-color: ${cfg.ringHex};"
+             class="relative bg-[#26140b]/85 border-2 border-[#6e4229] rounded-xl p-2.5 sm:p-3 flex flex-col justify-between transition-all duration-150">
+          
+          <!-- Top Line Header & Ringing Indicator -->
+          <div class="flex items-center justify-between gap-1 mb-1">
+            <span class="font-pixel text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded bg-[#140d1f] border border-white/20"
+                  style="color: ${cfg.bodyColor};">
+              ${cfg.lineLabel}
+            </span>
+            <span id="ringStatus-${cfg.id}" class="font-pixel text-[8px] sm:text-[9px] text-gray-500">
+              IDLE
+            </span>
+          </div>
+
+          <!-- Phone Graphic (Clickable to Answer directly!) -->
+          <div id="phoneVisual-${cfg.id}"
+               onclick="handleAnswerCall(${cfg.id})"
+               class="my-1 cursor-pointer flex flex-col items-center justify-center relative">
+            ${createPhoneSVG(cfg)}
+            <!-- Mini Caller ID Tag above phone when ringing -->
+            <div id="phoneMiniTag-${cfg.id}"
+                 class="mt-1 min-h-[22px] w-full text-center px-1.5 py-0.5 rounded bg-[#120d1d]/90 border border-white/10 text-xs sm:text-sm truncate text-gray-400">
+              -- NO SIGNAL --
+            </div>
+          </div>
+
+          <!-- Action Buttons: ANSWER & DROP -->
+          <div class="grid grid-cols-2 gap-1.5 mt-2">
+            <button id="ansBtn-${cfg.id}" type="button" disabled
+              onclick="handleAnswerCall(${cfg.id})"
+              class="arcade-btn bg-[#198f3a] text-white font-pixel text-[8px] sm:text-[9px] py-2.5 px-1 rounded-lg border border-[#39ff14] flex flex-col items-center justify-center leading-tight">
+              <span>ANSWER</span>
+              <span class="text-[7px] text-[#ffe600] mt-0.5">[KEY ${cfg.answerKey}]</span>
+            </button>
+
+            <button id="dropBtn-${cfg.id}" type="button" disabled
+              onclick="handleDropCall(${cfg.id})"
+              class="arcade-btn bg-[#8f192b] text-white font-pixel text-[8px] sm:text-[9px] py-2.5 px-1 rounded-lg border border-[#ff4d4d] flex flex-col items-center justify-center leading-tight">
+              <span>DROP</span>
+              <span class="text-[7px] text-gray-200 mt-0.5">[KEY ${cfg.dropKey}]</span>
+            </button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function updateLaptopDisplay() {
+      const activeCalls = state.phones
+        .map((call, idx) => ({ call, idx }))
+        .filter((item) => item.call !== null);
+
+      activeCallsCount.textContent = `ACTIVE LINES: ${activeCalls.length}/4`;
+
+      if (activeCalls.length > 0) {
+        laptopWaveform.classList.remove("opacity-40");
+        laptopWaveform.innerHTML = `
+          <span class="w-1 bg-[#39ff14] wave-bar" style="animation-delay:0.0s"></span>
+          <span class="w-1 bg-[#00f3ff] wave-bar" style="animation-delay:0.1s"></span>
+          <span class="w-1 bg-[#ffe600] wave-bar" style="animation-delay:0.2s"></span>
+          <span class="w-1 bg-[#ff2a85] wave-bar" style="animation-delay:0.15s"></span>
+          <span class="w-1 bg-[#39ff14] wave-bar" style="animation-delay:0.05s"></span>
+        `;
+      } else {
+        laptopWaveform.classList.add("opacity-40");
+      }
+
+      if (activeCalls.length === 0) {
+        laptopContent.innerHTML = `
+          <div class="text-center py-4 text-[#39ff14]/75 text-lg sm:text-xl tracking-wide">
+            [ SCANNING SWITCHBOARD... ALL LINES QUIET ]
+          </div>
+        `;
+        return;
+      }
+
+      // Display live Caller ID scanner rows for all currently ringing phones
+      laptopContent.innerHTML = activeCalls.map(({ call, idx }) => {
+        const cfg = PHONE_CONFIGS[idx];
+        const remainingPct = Math.max(0, Math.min(100, (call.timeRemaining / call.maxDuration) * 100));
+        const isTroll = call.isTroll;
+
+        return `
+          <div class="bg-[#0b261c] border border-[#246b50] rounded px-2 py-1 flex flex-col gap-0.5">
+            <div class="flex items-center justify-between gap-2 text-xs sm:text-sm">
+              <div class="flex items-center gap-1.5 truncate">
+                <span class="font-pixel text-[8px] px-1 py-0.5 rounded text-black font-bold" style="background:${cfg.bodyColor};">
+                  L${idx + 1}
+                </span>
+                <span class="font-bold tracking-wider ${isTroll ? 'text-[#ff6b6b]' : 'text-[#ffe600]'}">
+                  ${call.callerId}
+                </span>
+                <span class="text-[11px] sm:text-xs px-1 rounded ${isTroll ? 'bg-red-950 text-red-300 border border-red-500/40' : 'bg-emerald-950 text-emerald-300 border border-emerald-500/40'}">
+                  ${call.tag}
+                </span>
+              </div>
+              <span class="font-mono text-xs text-cyan-300 shrink-0">${(call.timeRemaining / 1000).toFixed(1)}s</span>
+            </div>
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-xs sm:text-sm text-green-100 truncate">${call.clue}</span>
+              <!-- Ring Timeout Bar -->
+              <div class="w-14 sm:w-20 h-1.5 bg-[#04120c] rounded overflow-hidden shrink-0 border border-[#1d543e]">
+                <div class="h-full transition-all duration-100 ${remainingPct < 30 ? 'bg-[#ff2a85]' : 'bg-[#39ff14]'}"
+                     style="width: ${remainingPct}%;"></div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function syncPhoneCardUI(lineIdx) {
+      const cfg = PHONE_CONFIGS[lineIdx];
+      const call = state.phones[lineIdx];
+      const card = document.getElementById(`phoneCard-${lineIdx}`);
+      const ringStatus = document.getElementById(`ringStatus-${lineIdx}`);
+      const miniTag = document.getElementById(`phoneMiniTag-${lineIdx}`);
+      const ansBtn = document.getElementById(`ansBtn-${lineIdx}`);
+      const dropBtn = document.getElementById(`dropBtn-${lineIdx}`);
+
+      if (!call) {
+        card.classList.remove("phone-ringing", "ring-2", "ring-[#ffe600]", "bg-[#3d2112]");
+        card.classList.add("bg-[#26140b]/85");
+        ringStatus.textContent = "IDLE";
+        ringStatus.className = "font-pixel text-[8px] sm:text-[9px] text-gray-500";
+        miniTag.textContent = "-- NO SIGNAL --";
+        miniTag.className = "mt-1 min-h-[22px] w-full text-center px-1.5 py-0.5 rounded bg-[#120d1d]/90 border border-white/10 text-xs sm:text-sm truncate text-gray-400";
+        ansBtn.disabled = true;
+        dropBtn.disabled = true;
+      } else {
+        card.classList.add("phone-ringing", "ring-2", "ring-[#ffe600]", "bg-[#3d2112]");
+        card.classList.remove("bg-[#26140b]/85");
+        ringStatus.textContent = "☎ RINGING!";
+        ringStatus.className = "font-pixel text-[8px] sm:text-[9px] text-[#ffe600] ring-badge-pulse";
+        miniTag.textContent = call.callerId;
+        miniTag.className = `mt-1 min-h-[22px] w-full text-center px-1.5 py-0.5 rounded bg-[#120d1d] border text-xs sm:text-sm font-bold truncate ${
+          call.isTroll ? "border-[#ff4d4d] text-[#ff6b6b]" : "border-[#39ff14] text-[#ffe600]"
+        }`;
+        ansBtn.disabled = false;
+        dropBtn.disabled = false;
+      }
+    }
+
+    function updateHUD() {
+      hudScore.textContent = String(state.score).padStart(5, "0");
+      hudHighScore.textContent = String(state.highScore).padStart(5, "0");
+
+      const mins = Math.floor(state.timeLeft / 60);
+      const secs = state.timeLeft % 60;
+      hudTimer.textContent = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+
+      if (state.timeLeft <= 10) {
+        hudTimer.className = "font-pixel text-lg sm:text-2xl text-[#ff1e1e] crt-glow-text-red animate-pulse";
+      } else if (state.timeLeft <= 25) {
+        hudTimer.className = "font-pixel text-lg sm:text-2xl text-[#ffe600] crt-glow-text-yellow";
+      } else {
+        hudTimer.className = "font-pixel text-lg sm:text-2xl text-[#39ff14]";
+      }
+
+      hudCombo.textContent = `x${state.comboMultiplier.toFixed(1)}`;
+
+      // Update Agent Rank Badge dynamically
+      if (state.score >= 3000) {
+        agentRankBadge.textContent = "LEGEND '84";
+        agentRankBadge.className = "font-pixel text-[9px] text-[#ff2a85] mt-0.5";
+      } else if (state.score >= 1500) {
+        agentRankBadge.textContent = "SUPERVISOR";
+        agentRankBadge.className = "font-pixel text-[9px] text-[#39ff14] mt-0.5";
+      } else if (state.score >= 500) {
+        agentRankBadge.textContent = "PRO AGENT";
+        agentRankBadge.className = "font-pixel text-[9px] text-[#00f3ff] mt-0.5";
+      } else {
+        agentRankBadge.textContent = "ROOKIE";
+        agentRankBadge.className = "font-pixel text-[9px] text-white mt-0.5";
+      }
+    }
+
+    // --------------------------------------------------------------------------
+    // 5. VISUAL FEEDBACK POPUPS & SCREEN SHAKE
+    // --------------------------------------------------------------------------
+    function spawnFloatingPopup(lineIdx, text, colorClass) {
+      const card = document.getElementById(`phoneCard-${lineIdx}`);
+      if (!card) return;
+
+      const containerRect = gameContainer.getBoundingClientRect();
+      const cardRect = card.getBoundingClientRect();
+
+      const popup = document.createElement("div");
+      popup.className = `floating-popup font-pixel text-xs sm:text-sm px-2.5 py-1 rounded bg-[#0a0614]/90 border border-white/30 shadow-lg ${colorClass}`;
+      popup.textContent = text;
+
+      const leftPos = cardRect.left - containerRect.left + cardRect.width / 2;
+      const topPos = cardRect.top - containerRect.top + 12;
+
+      popup.style.left = `${leftPos}px`;
+      popup.style.top = `${topPos}px`;
+
+      popupLayer.appendChild(popup);
+      setTimeout(() => {
+        if (popup.parentNode) popup.parentNode.removeChild(popup);
+      }, 1150);
+    }
+
+    function triggerRageBaitPenaltyFX() {
+      // Screen Shake
+      gameContainer.classList.remove("shake-screen");
+      void gameContainer.offsetWidth; // trigger reflow
+      gameContainer.classList.add("shake-screen");
+
+      // Red Flash Overlay
+      rageFlashLayer.classList.remove("hidden", "rage-flash-overlay");
+      void rageFlashLayer.offsetWidth;
+      rageFlashLayer.classList.add("rage-flash-overlay");
+      setTimeout(() => {
+        rageFlashLayer.classList.add("hidden");
+      }, 660);
+    }
+
+    // --------------------------------------------------------------------------
+    // 6. CORE GAMEPLAY MECHANICS (Spawning, Answering, Dropping, Timing)
+    // --------------------------------------------------------------------------
+    function spawnIncomingCall() {
+      if (!state.isPlaying) return;
+
+      // Find free phone lines
+      const freeLines = [];
+      for (let i = 0; i < 4; i++) {
+        if (state.phones[i] === null) freeLines.push(i);
+      }
+
+      // Determine max simultaneous ringing phones based on elapsed shift time
+      const elapsed = SHIFT_DURATION - state.timeLeft;
+      const maxSimultaneous = elapsed < 15 ? 2 : elapsed < 38 ? 3 : 4;
+      const activeCount = 4 - freeLines.length;
+
+      if (freeLines.length > 0 && activeCount < maxSimultaneous) {
+        const chosenLine = freeLines[Math.floor(Math.random() * freeLines.length)];
+
+        // ~42% chance of Rage Baiter, scaling slightly up in late shift
+        const trollProbability = elapsed < 15 ? 0.36 : elapsed < 40 ? 0.44 : 0.48;
+        const isTroll = Math.random() < trollProbability;
+
+        const pool = isTroll ? RAGE_BAITERS : VALID_CUSTOMERS;
+        const template = pool[Math.floor(Math.random() * pool.length)];
+
+        // Call ring duration shrinks slightly as shift intensifies (5.5s -> 3.6s)
+        const duration = Math.max(3600, 5600 - elapsed * 32);
+
+        state.phones[chosenLine] = {
+          ...template,
+          isTroll,
+          maxDuration: duration,
+          timeRemaining: duration
+        };
+
+        syncPhoneCardUI(chosenLine);
+        updateLaptopDisplay();
+        audio.playPhoneRing(PHONE_CONFIGS[chosenLine].pitchOffset);
+      }
+
+      // Schedule next call spawn dynamically
+      const nextDelay = Math.max(680, 1750 - elapsed * 18 + (Math.random() * 450 - 200));
+      state.spawnTimeout = setTimeout(spawnIncomingCall, nextDelay);
+    }
+
+    function handleAnswerCall(lineIdx) {
+      if (!state.isPlaying) return;
+      const call = state.phones[lineIdx];
+      if (!call) return;
+
+      // Clear line immediately
+      state.phones[lineIdx] = null;
+      syncPhoneCardUI(lineIdx);
+
+      if (call.isTroll) {
+        // RAGE BAITED! SCORE RESETS TO ZERO!
+        state.score = 0;
+        state.streakCount = 0;
+        state.comboMultiplier = 1.0;
+        state.trollsAnswered += 1;
+
+        audio.playRageBaitBuzzer();
+        triggerRageBaitPenaltyFX();
+        spawnFloatingPopup(lineIdx, "RAGE BAITED! SCORE = 0!", "text-[#ff1e1e] crt-glow-text-red");
+        lastCallTranscript.textContent = call.transcript;
+        lastCallTranscript.className = "text-[#ff6b6b] font-bold truncate";
+      } else {
+        // VALID CUSTOMER HELPED!
+        state.streakCount += 1;
+        state.comboMultiplier = Math.min(3.0, 1.0 + Math.floor(state.streakCount / 2) * 0.25);
+        if (state.comboMultiplier > state.maxStreakMultiplier) {
+          state.maxStreakMultiplier = state.comboMultiplier;
+        }
+
+        const earned = Math.round(call.points * state.comboMultiplier);
+        state.score += earned;
+        state.customersHelped += 1;
+
+        if (state.score > state.highScore) {
+          state.highScore = state.score;
+          localStorage.setItem(HIGH_SCORE_STORAGE_KEY, String(state.highScore));
+        }
+
+        audio.playCustomerWin(state.streakCount);
+        spawnFloatingPopup(lineIdx, `+${earned} PTS!`, "text-[#39ff14] crt-glow-text-cyan");
+        lastCallTranscript.textContent = call.transcript;
+        lastCallTranscript.className = "text-[#9efcd7] truncate";
+      }
+
+      updateHUD();
+      updateLaptopDisplay();
+    }
+
+    function handleDropCall(lineIdx) {
+      if (!state.isPlaying) return;
+      const call = state.phones[lineIdx];
+      if (!call) return;
+
+      state.phones[lineIdx] = null;
+      syncPhoneCardUI(lineIdx);
+
+      if (call.isTroll) {
+        // Smartly screened and dropped a Rage Baiter!
+        const dodgeBonus = 25;
+        state.score += dodgeBonus;
+        state.trollsDodged += 1;
+
+        if (state.score > state.highScore) {
+          state.highScore = state.score;
+          localStorage.setItem(HIGH_SCORE_STORAGE_KEY, String(state.highScore));
+        }
+
+        audio.playDropSuccess();
+        spawnFloatingPopup(lineIdx, `TROLL BLOCKED +${dodgeBonus}`, "text-[#ffe600] crt-glow-text-yellow");
+        lastCallTranscript.textContent = `BLOCKED ${call.callerId}: Prank call disconnected!`;
+        lastCallTranscript.className = "text-[#ffe600] truncate";
+      } else {
+        // Accidentally hung up on a real customer — resets streak
+        state.streakCount = 0;
+        state.comboMultiplier = 1.0;
+
+        audio.playDropSuccess();
+        spawnFloatingPopup(lineIdx, "HUNG UP ON CLIENT!", "text-orange-400");
+        lastCallTranscript.textContent = `OOPS! Disconnected valid caller ${call.callerId}!`;
+        lastCallTranscript.className = "text-orange-300 truncate";
+      }
+
+      updateHUD();
+      updateLaptopDisplay();
+    }
+
+    // --------------------------------------------------------------------------
+    // 7. SHIFT TIMER & RINGING TICK LOOP
+    // --------------------------------------------------------------------------
+    let ringLoopHandle = null;
+    let lastTickTimestamp = 0;
+
+    function runFrameLoop(timestamp) {
+      if (!state.isPlaying) return;
+      if (!lastTickTimestamp) lastTickTimestamp = timestamp;
+      const dt = timestamp - lastTickTimestamp;
+      lastTickTimestamp = timestamp;
+
+      let laptopNeedsRefresh = false;
+
+      for (let i = 0; i < 4; i++) {
+        const call = state.phones[i];
+        if (call) {
+          call.timeRemaining -= dt;
+          laptopNeedsRefresh = true;
+
+          if (call.timeRemaining <= 0) {
+            // Call rang out unanswered
+            const wasTroll = call.isTroll;
+            state.phones[i] = null;
+            syncPhoneCardUI(i);
+
+            if (wasTroll) {
+              state.trollsDodged += 1;
+              spawnFloatingPopup(i, "TROLL GAVE UP!", "text-cyan-300");
+            } else {
+              // Missed valid customer resets combo
+              state.streakCount = 0;
+              state.comboMultiplier = 1.0;
+              updateHUD();
+              spawnFloatingPopup(i, "MISSED CALL!", "text-gray-300");
+            }
+          }
+        }
+      }
+
+      if (laptopNeedsRefresh) {
+        updateLaptopDisplay();
+      }
+
+      ringLoopHandle = requestAnimationFrame(runFrameLoop);
+    }
+
+    function startShift() {
+      audio.init();
+
+      // Clear any previous timers
+      clearInterval(state.timerInterval);
+      clearInterval(state.ringSoundInterval);
+      clearTimeout(state.spawnTimeout);
+      if (ringLoopHandle) cancelAnimationFrame(ringLoopHandle);
+
+      // Reset State
+      state.isPlaying = true;
+      state.timeLeft = SHIFT_DURATION;
+      state.score = 0;
+      state.streakCount = 0;
+      state.comboMultiplier = 1.0;
+      state.maxStreakMultiplier = 1.0;
+      state.customersHelped = 0;
+      state.trollsDodged = 0;
+      state.trollsAnswered = 0;
+      state.phones = [null, null, null, null];
+
+      for (let i = 0; i < 4; i++) {
+        syncPhoneCardUI(i);
+      }
+
+      startOverlay.classList.add("hidden");
+      gameOverOverlay.classList.add("hidden");
+      lastCallTranscript.textContent = "SHIFT STARTED! Watch Caller IDs closely!";
+      lastCallTranscript.className = "text-[#39ff14] truncate";
+
+      updateHUD();
+      updateLaptopDisplay();
+
+      // Spawn first call right away
+      spawnIncomingCall();
+
+      // Periodic phone ring audio reminder if any phone is currently ringing
+      state.ringSoundInterval = setInterval(() => {
+        if (!state.isPlaying) return;
+        const ringingIdx = state.phones.findIndex((c) => c !== null);
+        if (ringingIdx !== -1) {
+          audio.playPhoneRing(PHONE_CONFIGS[ringingIdx].pitchOffset);
+        }
+      }, 1350);
+
+      // 1-Second Countdown Shift Clock
+      state.timerInterval = setInterval(() => {
+        if (!state.isPlaying) return;
+        state.timeLeft -= 1;
+        updateHUD();
+
+        if (state.timeLeft <= 10 && state.timeLeft > 0) {
+          audio.playClockTick(state.timeLeft <= 5);
+        }
+
+        if (state.timeLeft <= 0) {
+          endShift();
+        }
+      }, 1000);
+
+      lastTickTimestamp = 0;
+      ringLoopHandle = requestAnimationFrame(runFrameLoop);
+    }
+
+    function endShift() {
+      state.isPlaying = false;
+      clearInterval(state.timerInterval);
+      clearInterval(state.ringSoundInterval);
+      clearTimeout(state.spawnTimeout);
+      if (ringLoopHandle) cancelAnimationFrame(ringLoopHandle);
+
+      // Silence and reset all phones
+      for (let i = 0; i < 4; i++) {
+        state.phones[i] = null;
+        syncPhoneCardUI(i);
+      }
+      updateLaptopDisplay();
+      audio.playGameOver();
+
+      // Populate Game Over Stats
+      document.getElementById("finalScoreStat").textContent = String(state.score).padStart(5, "0");
+      document.getElementById("statCustomersHelped").textContent = state.customersHelped;
+      document.getElementById("statTrollsDodged").textContent = state.trollsDodged;
+      document.getElementById("statTrollsAnswered").textContent = state.trollsAnswered;
+      document.getElementById("statMaxStreak").textContent = `x${state.maxStreakMultiplier.toFixed(1)}`;
+
+      const newHighBanner = document.getElementById("newHighScoreBanner");
+      if (state.score > 0 && state.score >= state.highScore) {
+        newHighBanner.classList.remove("hidden");
+      } else {
+        newHighBanner.classList.add("hidden");
+      }
+
+      gameOverOverlay.classList.remove("hidden");
+    }
+
+    // --------------------------------------------------------------------------
+    // 8. EVENT LISTENERS & KEYBOARD CONTROLS
+    // --------------------------------------------------------------------------
+    startGameBtn.addEventListener("click", startShift);
+    restartGameBtn.addEventListener("click", startShift);
+
+    soundToggleBtn.addEventListener("click", () => {
+      const isMuted = audio.toggleMute();
+      soundIcon.textContent = isMuted ? "🔇" : "🔊";
+      soundLabel.textContent = isMuted ? "MUTED" : "SFX ON";
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if (!state.isPlaying) {
+        if (e.code === "Enter" || e.code === "Space") {
+          if (!startOverlay.classList.contains("hidden") || !gameOverOverlay.classList.contains("hidden")) {
+            e.preventDefault();
+            startShift();
+          }
+        }
+        return;
+      }
+
+      const key = e.key.toUpperCase();
+      if (key === "1") handleAnswerCall(0);
+      else if (key === "2") handleAnswerCall(1);
+      else if (key === "3") handleAnswerCall(2);
+      else if (key === "4") handleAnswerCall(3);
+      else if (key === "Q") handleDropCall(0);
+      else if (key === "W") handleDropCall(1);
+      else if (key === "E") handleDropCall(2);
+      else if (key === "R") handleDropCall(3);
+    });
+
+    // Expose click handlers globally for inline button triggers
+    window.handleAnswerCall = handleAnswerCall;
+    window.handleDropCall = handleDropCall;
+
+    // Initial Boot
+    buildPhonesDOM();
+    updateHUD();
+  </script>
+</body>
+</html>
